@@ -1,0 +1,114 @@
+Hat-trans is partly based on the source code of the nhc98 Haskell
+compiler, whose copyright and licensing terms are noted here:
+    http://haskell.org/nhc98
+
+The Hat system as a whole was developed (mainly) at, and is copyright to
+  (c) The University of York, 1996-2005.
+
+Additionally,
+
+hat-trans is
+  (c) copyright to Olaf Chitil and Malcolm Wallace, 2002-2004.
+hat-observe is
+  (c) copyright to Malcolm Wallace and Thorsten Brehm, 2001-2004.
+hat-detect is
+  (c) copyright to Malcolm Wallace and Thorsten Brehm, 2001-2004.
+hat-trail is
+  (c) copyright to Malcolm Wallace, 2002-2004.
+hat-stack is
+  (c) copyright to Malcolm Wallace, 2001-2004.
+hat-check is
+  (c) copyright to Colin Runciman, 2001-2004.
+hat-cover is
+  (c) copyright to Colin Runciman, 2004.
+hat-explore is
+  (c) copyright to Olaf Chitil, 2004-2005.
+hat-anim is
+  (c) copyright to Thomas Davie, 2004-2005.
+hat-nonterm is
+  (c) copyright to Mike Dodds, 2004.
+black-hat is
+  (c) copyright to Mike Dodds, 2004.
+
+The Hat tools are distributed under the terms of the licence
+detailed below.  If you link the Hat tools with the gtk+ library
+'glib', you should know that 'glib' is governed by the LGPL.
+
+Some code from the libraries is copied directly from the
+Haskell hierarchical libraries base package, which is
+  (c) copyright the University of Glasgow, 2001-2004
+and was originally distributed under a separate BSD-style licence.
+
+
+LICENCE
+-------
+Definition: "this software" = any software which is distributed under
+                              the conditions of this licence.
+            "small number of modules" = less than 10% of any one program
+
+It is the intention that this software be "freely available" in the Gnu
+(http://www.gnu.org/) and Open Source (http://www.opensource.org/)
+traditions.  The following is a brief statement of the rights and
+restrictions attached to this software distribution.  This is version
+2 of the licence, and governs this copy of the software.  We may
+publish modified terms and conditions at a later date, and if you
+wish, you may apply any successor licence (when published), or the
+GNU GPL, to this software as an alternative to the current terms.
+(Note that if you convert your copy of the licence to the GPL, you
+will not be able to convert it back later, and nor can anyone who
+receives a copy from you.)
+
+If you are not sure about any of the terms of this licence, please
+contact us to discuss your requirements.  (Primary contact:
+Malcolm.Wallace@cs.york.ac.uk)
+
+You may use, re-distribute, and modify this software, in whole or
+in part, in source or binary form, but you must include without
+alteration all the relevant copyright notices.  (You may of course
+remove a copyright notice pertaining to a piece of software no longer
+included in your distribution.)  You may add your own additional
+copyright notices for any modifications or additions to this software
+that you distribute.  If you distribute a modified version, you must
+also provide corresponding source code for it; any modifications must
+be described in the documentation; and you must clearly indicate that
+the software has been modified, for instance by changing the name of
+the executable or its version number, or by some other method.
+
+You must not restrict anyone else's rights to use, re-distribute
+or modify this software.  Distributions of standard or modified
+versions of any part of this software must retain this licence (or
+its successor), or at your choice, be distributed instead under the
+GNU GPL.
+
+In addition, you are explicitly granted the right to re-use a small
+number of modules of this software in the creation of a new program
+which does not perform substantially the same task as this software,
+for instance, by re-using a parser but not the entire compiler.
+In such a case, you are not forced to place the new software under
+this or any other licence, but you must ensure that:
+ . you clearly acknowledge which code you have re-used from this software,
+ . you retain the relevant copyright notices, and
+ . if you distribute the new software, you indicate to recipients where
+   they can freely obtain a standard copy of this original software.
+
+Object files, intermediate files, and trace files, produced as output by
+this software, do not fall under this copyright statement and are not
+governed by the terms of this licence.  You are free to use them (or
+restrict their use) as you like.  However, the inclusion of Hat's
+runtime system (libHSHat.a) in a resulting executable, means that you
+may not distribute that executable except under the terms of this
+licence.  (We can't see any reason why anyone would want to distribute a
+traced version of their program anyway - but if this is a problem for
+you, contact us.  Also, you should check carefully the licence of any
+other library you use in your traced program, whether supplied together
+with this software or not.)
+
+
+UNLESS OTHERWISE STATED IN WRITING, THIS SOFTWARE IS SUPPLIED "AS IS"
+AND WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED, INCLUDING WITHOUT
+LIMITATION THE IMPLIED WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A
+PARTICULAR PURPOSE.  NEITHER THE AUTHORS, COPYRIGHT HOLDERS, NOR ANY
+OTHER PARTY WHO REDISTRIBUTES THIS SOFTWARE SHALL BE LIABLE FOR DAMAGES,
+HOWSOEVER CAUSED, ARISING OUT OF THE USE OF THIS SOFTWARE.  USE AT YOUR
+OWN RISK.
+

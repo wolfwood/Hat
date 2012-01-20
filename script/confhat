@@ -1,0 +1,92 @@
+#!/bin/sh
+#	confhat -- install the Hat system for ghc or nhc98
+#	author:   Malcolm.Wallace@cs.york.ac.uk, Mar 2002
+
+MACHINE=${MACHINE-`script/harch`}
+PWD=`pwd`
+COMP=$1
+PREFIX=$2
+HC=`echo $COMP | cut -c1-3`	# e.g. ghc
+VER=`echo $COMP | cut -c4-`	# e.g. 6.2.1
+
+TRUE=/bin/true
+if [ ! -x $TRUE ]
+then TRUE=/usr/bin/true
+fi
+
+#DIRS="Data Control Control/Monad Debug Foreign Foreign/Marshal System \
+#	System/Console System/IO Test Text Text/ParserCombinators \
+#	Text/ParserCombinators/Parsec Text/PrettyPrint"
+HATDIRS="Hat `for dir in $DIRS; do echo Hat/$dir; done`"
+
+echo "Built with $HC"
+if [ "$HC" = "ghc" -a -d lib/$MACHINE/lib/$COMP ]
+then
+  # discover ghc version (technique courtesy of Simon Marlow)
+  echo "main = print __GLASGOW_HASKELL__" >ghcsym.hs;
+  $COMP -cpp ghcsym.hs -o ghcsym.out;
+  GHCSYM=`./ghcsym.out`
+  rm -f ghcsym.hs ghcsym.out;
+
+#  # installation location for ghc
+  libdir=$DESTDIR$PREFIX/lib/hat-$HATVERSION/$MACHINE/ghc-$GHCSYM
+  incdir=$DESTDIR$PREFIX/imports/hat-$HATVERSION/ghc-$GHCSYM
+  echo >&2 "Installing hat package for ghc under $libdir"
+  mkdir -p $libdir
+  mkdir -p $incdir
+
+  # install ghc package components
+  echo -P$incdir >lib/$MACHINE/lib/$COMP/ghcincdir
+  cp -p lib/$MACHINE/lib/$COMP/libHShat.a $libdir  && \
+  ranlib $libdir/libHShat.a && \
+  if [ -d $incdir ]
+  then
+    rm -rf $incdir/Hat && \
+    { ghc-pkg$VER --remove-package=hat || echo "(You can ignore this error)"; }
+  else
+    mkdir $incdir
+  fi && \
+  for dir in $HATDIRS; \
+      do mkdir $incdir/$dir && \
+         cp lib/$MACHINE/lib/$COMP/$dir/*.hi $incdir/$dir; \
+      done  && \
+  if [ $GHCSYM -ge 604 ]
+  then
+      { cat  lib/$MACHINE/lib/$COMP/hat-package.conf ;
+        echo "import-dirs:	$incdir";
+        echo "library-dirs:	$libdir";
+      } | ghc-pkg$VER register -
+  else
+    cat lib/$MACHINE/lib/$COMP/hat-package.conf | ghc-pkg$VER --add-package
+  fi 
+else
+  echo "Not built with GHC"
+fi
+if [ -d lib/$MACHINE/lib/nhc98 ]
+then
+  # discover nhc98 location
+  nhc98=`which nhc98`
+  libdir=`grep '^NHC98LIBDIR' $nhc98 | cut -c27- | cut -d'}' -f1 | head -n 1`
+  incdir=`grep '^NHC98INCDIR' $nhc98 | cut -c27- | cut -d'}' -f1 | head -n 1`
+  libdir=$DESTDIR$libdir
+  incdir=$DESTDIR$incdir
+  echo >&2 "Installing hat package for nhc98 under $libdir"
+  mkdir -p $libdir/$MACHINE
+  mkdir -p $incdir
+
+  # install nhc98 package components
+  cp -p lib/$MACHINE/lib/nhc98/libHShat.a $libdir/$MACHINE  && \
+  if [ -d $incdir/hat ]
+  then rm -rf $incdir/hat
+  fi
+  if [ -d $incdir/packages/hat ]
+  then rm -rf $incdir/packages/hat/Hat
+  else mkdir -p $incdir/packages/hat
+  fi && \
+  for dir in $HATDIRS; \
+      do mkdir $incdir/packages/hat/$dir; \
+      done  && \
+  for dir in $HATDIRS; \
+      do cp lib/$MACHINE/lib/$COMP/$dir/*.hi $incdir/packages/hat/$dir; \
+      done
+fi

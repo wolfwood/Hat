@@ -1,0 +1,539 @@
+#!/bin/sh
+#	hat-configure -- prepare to compile/install hat
+#	author:   Malcolm.Wallace@cs.york.ac.uk
+#       (nhc13config - March 1998)
+#       (nhc98config - May 1999)
+#       (configure   - Oct 1999)
+#       (hat-configure - June 2002)
+#       (configure   - March 2003)
+
+# When incrementing this version number, don't forget to change the
+# corresponding definition in the Makefile!
+HATVERSION="2.06" export HATVERSION
+
+# Hat tools whose scripts are /only/ a simple redirect to the executable.
+#HATTOOLS="hat-stack hat-check hat-observe hat-detect hat-view hat-trail \
+#	hat-names"
+HATTOOLS="hat-stack hat-check hat-observe hat-detect hat-delta hat-view \
+          hat-trail hat-anim hat-explore hat-cover black-hat hat-nonterm \
+          pretty-hat"
+
+if uname >/dev/null 2>&1
+then OS=`uname -s`
+else OS=unknown
+fi
+
+# Note for people building binary packages of hat:
+# The variable INSTALLDIR, default /usr/local, changed with --prefix=
+# gives the final destination of everything.  The configure script
+# hard-wires this path into scripts when you give the --install flag.
+# However, if you set the environment variable DESTDIR, the installation
+# process will still hardwire your INSTALLDIR into scripts, but actually
+# install the files in $DESTDIR$INSTALLDIR.  In this way, you can build
+# a complete installation tree in a temporary directory, then tar it up
+# as a package with all the scripts pointing to the correct final location.
+INSTALLDIR=/usr/local
+
+USER=${USER-`whoami 2>/dev/null`}
+MACHINE=`script/harch`
+case $OS in
+  Darwin*) CCC=${CC-cc};;
+  *)       CCC=${CC-gcc};;
+esac
+PWD=`pwd`
+case $OS in
+  CYGWIN*) PWD=`cygpath -w "$PWD" | tr '\\\\' '/'`
+           case $PWD in        # path mangling required for older CYGWIN ?
+             file://?/*) PWD=`echo $PWD | sed -e "s|^file://||" |\
+                              sed -e "s|^[^/]|&:|"` ;;
+             //?/*)      PWD=`echo $PWD | sed -e "s|^//||" |\
+                              sed -e "s|^[^/]|&:|"` ;;
+           esac
+           EXE=.exe ;;
+  *) EXE="" ;;
+esac
+
+# We need a working `echo' command: at least Solaris2.6 may not have it.
+case `echo -n hello | wc -c | ( read n ; echo $n )` in
+    5) ;;
+    *) echo "The builtin 'echo' command doesn't do '-n' - emulating it."
+       $CCC -o script/echo script/echo.c
+       echo () { $PWD/script/echo "$@"; } ;;
+esac
+
+BUILDWITH=
+
+BUILDLIBDIR=$PWD/lib
+BUILDINCDIR=$PWD/include
+BUILDBINDIR=$PWD/script
+BUILDDIR=$PWD/targets
+
+INSTALL=no
+LIB=yes
+BIN=yes
+INC=yes
+MAN=yes
+DOCS=no
+
+if [ -f targets/$MACHINE/config.cache ]
+then		# cached settings override defaults above
+  . targets/$MACHINE/config.cache
+else
+  if [ ! -d targets/$MACHINE ]
+  then mkdir -p targets/$MACHINE
+  fi
+fi
+NEWHEAP=$HEAP
+
+while [ "$1" != "" ]
+do
+  case $1 in
+    +lib) LIB=yes ;;
+    -lib) LIB=no ;;
+    +bin) BIN=yes ;;
+    -bin) BIN=no ;;
+    +inc) INC=yes ;;
+    -inc) INC=no ;;
+    +man) MAN=yes ;;
+    -man) MAN=no ;;
+    +docs) DOCS=yes ;;
+    -docs) DOCS=no ;;
+    --buildwith=*)  BUILDWITH=`echo "$1" | cut -c13-` ;;
+    --buildopts=*)  BUILDOPTS=$BUILDOPTS" "`echo "$1" | cut -c13-` ;;
+    --builddir=*)   BUILDDIR=`echo "$1" | cut -c12-` ;;
+    --prefix=*)     INSTALLDIR=`echo "$1" | cut -c10-` ;;
+    --installdir=*) INSTALLDIR=`echo "$1" | cut -c14-` ;;
+    --bindir=*)  BINDIR=`echo "$1" | cut -c10-` ;;
+    --libdir=*)  LIBDIR=`echo "$1" | cut -c10-` ;;
+    --incdir=*)  INCDIR=`echo "$1" | cut -c10-` ;;
+    --mandir=*)  MANDIR=`echo "$1" | cut -c10-` ;;
+    --docdir=*)  DOCDIR=`echo "$1" | cut -c10-` ;;
+#   --ghcdir=*)  GHCDIR=`echo "$1" | cut -c10-` ;;
+    --install)   INSTALL=yes ;;
+    --config)    INSTALL=no ;;
+    --help|-h)
+  echo "`basename $0` options:     [default in brackets]"
+  echo "  --config             Configure only (do not install) [default]"
+  echo "  --install            Configure AND install now"
+  echo "  --help / -h          Display these options and quit"
+  echo "  --version / -v       Display version of hat"
+  echo
+  echo "  --buildwith=comp     Build hat with given compiler [detected]"
+  echo "  --buildopts=flags    Give extra flags needed by your build compiler [none]"
+  echo "  --builddir=dir       Build intermediate object files under dir [./targets]"
+ #echo
+ #echo "  --ghcdir=dir         Tell hmake about ghc installation in dir [detected]"
+  echo
+  echo "  --prefix=rootdir     |"
+  echo "  --installdir=rootdir | Use rootdir as base for installation [/usr/local]"
+  echo "  --bindir=dir         Install scripts in dir [rootdir/bin]"
+  echo "  --libdir=dir         Install libraries in dir [rootdir/lib/hat]"
+  echo "  --incdir=dir         Install interfaces in dir [rootdir/include/hat]"
+  echo "  --mandir=dir         Install man pages in dir [rootdir/man/man1]"
+  echo "  --docdir=dir         Install html docs in dir [/usr/doc/hat]"
+  echo
+  echo "  [+/-]bin             Do/don't (re-)install scripts [+bin]"
+  echo "  [+/-]lib             Do/don't (re-)install executables [+lib]"
+  echo "  [+/-]inc             Do/don't (re-)install interface files [+inc]"
+  echo "  [+/-]man             Do/don't (re-)install man pages [+man]"
+  echo "  [+/-]docs            Do/don't (re-)install html docs [-docs]"
+            exit 0 ;;
+    --version|-v) echo "hat:       $HATVERSION"
+                  echo '  [' $INSTALLINFO ']'
+                  exit 0 ;;
+    *) echo "`basename $0`: unrecognised option $1"
+       echo '    (use --help for option information)'
+       exit 1 ;;
+  esac
+  shift
+done
+
+echo Configuring for hat... '[' $HATVERSION ']'
+if [ -f targets/$MACHINE/config.cache ]
+then
+  echo "Starting with earlier config in targets/$MACHINE/config.cache"
+  echo '[' $INSTALLINFO ']'
+  echo '  (but cmdline options have precedence)'
+fi
+
+INSTALLINFO="config: $MACHINE/$BUILDWITH by $USER@`uname -n` on `date | cut -c9-10` `date | cut -c5-8,25-`"
+
+LIBDIR=${LIBDIR-$INSTALLDIR/lib/"hat-$HATVERSION"}
+BINDIR=${BINDIR-$INSTALLDIR/bin}
+INCDIR=${INCDIR-$INSTALLDIR/include/"hat-$HATVERSION"}
+MANDIR=${MANDIR-$INSTALLDIR/man/man1}
+DOCDIR=${DOCDIR-$INSTALLDIR/doc/hat}
+#GHCDIR=${GHCDIR}
+
+case $OS in
+  CYGWIN*) INSTALLDIR=`cygpath -w "$INSTALLDIR" | tr '\\\\' '/'`
+           BUILDDIR=`cygpath -w "$BUILDDIR" | tr '\\\\' '/'`
+           LIBDIR=`cygpath -w "$LIBDIR" | tr '\\\\' '/'`
+           BINDIR=`cygpath -w "$BINDIR" | tr '\\\\' '/'`
+           INCDIR=`cygpath -w "$INCDIR" | tr '\\\\' '/'`
+           LIBCOMPAT=""
+           ;;
+  SunOS)  LIBCOMPAT=" -lsocket -lnsl"  ;;
+  NetBSD) LIBCOMPAT=" -lcompat"  ;;
+  *)      LIBCOMPAT=  ;;
+esac
+
+# Detect Haskell compilers and choose one for building with.
+if [ -d src ]	# Delay this step if it is a binary (src-less) distribution.
+then
+  echo "--------"
+  script/confhc-hat $BUILDWITH || exit 1
+  echo "--------"
+fi
+
+echo "                   Configuration report for hat."
+
+if [ "$INSTALL" = "no" ]
+then
+  echo "    (You can re-run `basename $0` to change settings before proceeding.)"
+  echo "You wish (eventually) to install the following components in these locations:"
+  echo "    (Installation directories are not created/checked at this stage.)"
+  echo "Final install root:   $INSTALLDIR"
+  if [ "$LIB" = "yes" ]
+  then
+    echo "Hat   binaries:       $LIBDIR/$MACHINE"
+  else
+    echo "Executables and libs: (none)"
+  fi
+  if [ "$INC" = "yes" ]
+  then
+    echo "Hat interfaces:       $INCDIR"
+  else
+    echo "Interfaces/includes:  (none)"
+  fi
+  if [ "$BIN" = "yes" ]
+  then
+    echo "Scripts:              $BINDIR"
+  else
+    echo "Scripts:              (none)"
+  fi
+  if [ "$MAN" = "yes" ]
+  then
+    echo "Man pages:            $MANDIR"
+  else
+    echo "Man pages:            (none)"
+  fi
+  if [ "$DOCS" = "yes" ]
+  then
+    echo "Html documents:       $DOCDIR"
+  else
+    echo "Html documents:       (none)"
+  fi
+
+  if [ -d src ]	# Don't bother with these if unpacking a binary distribution
+  then
+    echo
+    echo "Now we check/create your build directories:"
+    echo "Config directory:      targets/$MACHINE"
+    echo "Build directory root:"
+    echo -n "    $BUILDDIR"
+    if [ ! -d $BUILDDIR ]
+    then mkdir -p $BUILDDIR;  echo ' (created)'
+    else echo ' (exists)'
+    fi
+    echo "Object files build in:"
+    echo -n "    $BUILDDIR/$MACHINE"
+    if [ ! -d $BUILDDIR/$MACHINE ]
+    then mkdir -p $BUILDDIR/$MACHINE;  echo ' (created)'
+    else echo ' (exists)'
+    fi
+    echo "Executables and libs:"
+    echo -n "    $BUILDLIBDIR/$MACHINE"
+    if [ ! -d $BUILDLIBDIR/$MACHINE ]
+    then mkdir -p $BUILDLIBDIR/$MACHINE;  echo ' (created)'
+    else echo ' (exists)'
+    fi
+  else
+    echo
+    echo "Checking your binary distribution for integrity:"
+    echo -n "Config directory:      targets/$MACHINE"
+    if [ ! -d targets/$MACHINE ]
+    then mkdir -p targets/$MACHINE;  echo ' (created ok)'
+    else echo ' (exists)'
+    fi
+    echo -n "Executables and libs:  $BUILDLIBDIR/$MACHINE"
+    if [ ! -d $BUILDLIBDIR/$MACHINE ]
+    then echo ' (***MISSING!)'
+         echo 'Help!  Have you got the right executables for your machine?'
+         exit 1
+    else echo ' (ok)'
+    fi
+  fi
+fi
+
+echo
+
+# The following tests are unnecessary in a binary (src-less) distribution.
+if [ -d src ]
+then
+  if [ "$BUILDWITH" = "" ]
+  then
+    BUILDWITH=`cat targets/$MACHINE/buildwith`
+    echo "I am guessing you will build hat with:      $BUILDWITH"
+  else
+    echo "You are going to build hat with:            $BUILDWITH"
+  fi
+  if [ "$BUILDOPTS" != "" ]
+  then echo "You gave the following extra build options: $BUILDOPTS"
+  fi
+
+  if [ "$EXE" = "" ]
+  then echo "Executables need .exe suffix?               no  (detected)"
+  else echo "Executables need .exe suffix?               yes (detected)"
+  fi
+
+  TRUE=/bin/true
+  if [ ! -x $TRUE ]
+  then TRUE=/usr/bin/true
+       echo "Found /usr/bin/true not /bin/true"
+  fi
+
+  echo -n "Testing for the glib library: "
+  if glib-config --version >/dev/null 2>&1
+  then
+    echo '              yes (detected)'
+    echo '#define HAVE_GLIB 1' >src/tools/checkglib.h
+    GLIB=glib
+  else
+    echo '              no  (using slower replacement)'
+    echo '' >src/tools/checkglib.h
+    GLIB=local
+  fi
+
+else	# do the following only in binary distributions
+  if [ -f lib/$MACHINE/config ]
+  then
+    . lib/$MACHINE/config
+    echo "Your binary distribution of hat was built by $BUILDWITH."
+  else
+    echo "ERROR: This hat distribution apparently has no sources and no executables!"
+    exit 1
+  fi
+  # compiler detection deferred from earlier because of BUILDWITH variable
+  echo "--------"
+  script/confhc-hat $BUILDWITH || exit 1
+  echo "--------"
+fi
+
+
+echo
+
+
+if [ "$INSTALL" = "no" ]
+then
+  if [ -d src ]	# Don't overwrite config if unpacking binary distribution!
+  then
+    echo "Adding Makefile config script to"
+    echo "    $BUILDLIBDIR/$MACHINE..."
+    ( echo "BUILDWITH=$BUILDWITH";
+      echo "BUILDOPTS=${BUILDOPTS:+\"$BUILDOPTS\"}";
+      echo "INSTALLVER=\"$HATVERSION\"";
+      echo "INSTALLINFO=\"$INSTALLINFO\"";
+      echo "BUILDBASEDIR=$BUILDDIR";
+      echo "LIBCOMPAT=${LIBCOMPAT:+\"$LIBCOMPAT\"}";
+      echo "EXE=$EXE";
+      echo "CC=$CCC";
+      echo "GHCSYM=`cat targets/$MACHINE/ghcsym || true`";
+      echo "TRUE=$TRUE";
+      echo "GLIB=$GLIB";
+    ) >$BUILDLIBDIR/$MACHINE/config
+
+    echo "Adding build scripts to"
+    echo "    $BUILDBINDIR...    "
+    echo -n "    hat-trans"
+    sed -e "s|ExecutableDir|$BUILDLIBDIR|" script/hat-trans.inst |\
+    sed -e "s|ScriptDir|$BUILDBINDIR|" >$BUILDBINDIR/hat-trans
+    echo
+    sed -e "s|ExecutableDir|$BUILDLIBDIR|" script/hat-template.inst |\
+    sed -e "s|ScriptDir|$BUILDBINDIR|" |\
+    sed -e "s|IncludeDir|$BUILDINCDIR|" >$BUILDBINDIR/hat-template
+    echo -n "    hat-graph "
+    sed -e "s|ScriptDir|$BUILDBINDIR|" script/hat-graph.inst \
+        >$BUILDBINDIR/hat-graph
+    chmod +x $BUILDBINDIR/hat-trans $BUILDBINDIR/hat-template
+    chmod +x $BUILDBINDIR/hat-graph
+    for hattool in $HATTOOLS
+    do  echo -n $hattool" "
+        rm -f $BUILDBINDIR/$hattool
+        ln $BUILDBINDIR/hat-template $BUILDBINDIR/$hattool
+    done
+    echo
+    rm $BUILDBINDIR/hat-template
+
+  fi
+
+else	# [ "$INSTALL" = "yes" ]
+
+  echo "Installation directories are now created/checked."
+  echo "Install directory root is:"
+  echo "    $DESTDIR$INSTALLDIR"
+
+  if [ "$INC" = "yes" ]
+  then
+    echo "Hat interface files (.hx) go into:"
+    echo -n "    $DESTDIR$INCDIR"
+    if [ ! -d $DESTDIR$INCDIR ]
+    then mkdir -p $DESTDIR$INCDIR;  echo ' (created)'
+    else echo ' (exists)'
+    fi
+    for file in $BUILDINCDIR/hat/*.hx
+    do
+      if [ -f $file ]
+      then echo "	`basename $file` "
+           cp $file $DESTDIR$INCDIR
+      fi
+    done
+    #for dir in `script/pkgdirlist base`
+    #do
+    #  mkdir -p $DESTDIR$INCDIR/$dir
+    #  for file in $BUILDINCDIR/hat/$dir/*.hx
+    #  do
+    #    if [ -f $file ]
+    #    then echo "	$dir/`basename $file`"
+    #         cp $file $DESTDIR$INCDIR/$dir
+    #    fi
+    #  done
+    #done
+    #for dir in `script/pkgdirlist QuickCheck`
+    #do
+    #  mkdir -p $DESTDIR$INCDIR/$dir
+    #  for file in $BUILDINCDIR/hat/$dir/*.hx
+    #  do
+    #    if [ -f $file ]
+    #    then echo "	$dir/`basename $file`"
+    #         cp $file $DESTDIR$INCDIR/$dir
+    #    fi
+    #  done
+    #done
+    case $BUILDWITH in
+      ghc*) echo "Installing hat as a ghc package:" ;;
+      nhc*) echo "Installing hat as an nhc98 package:" ;;
+    esac
+    script/confhat $BUILDWITH $INSTALLDIR
+    echo
+  else
+    echo 'Not (re-)installing interface and include files'
+  fi
+
+  if [ "$BIN" = "yes" ]
+  then 
+    echo "Scripts go into:"
+    echo -n "    $DESTDIR$BINDIR"
+    if [ ! -d $DESTDIR$BINDIR ]
+    then mkdir -p $DESTDIR$BINDIR;  echo ' (created)'
+    else echo ' (exists)'
+    fi
+    echo "	harch"		# is already available from hmake
+    cp script/harch $DESTDIR$BINDIR
+    echo "	hat-graph"
+   #cp script/hat-graph $DESTDIR$BINDIR
+    sed -e "s|ScriptDir|$BINDIR|" script/hat-graph.inst \
+        >$DESTDIR/$BINDIR/hat-graph
+    echo "	hat-trans"
+    sed -e "s|ExecutableDir|$LIBDIR|" script/hat-trans.inst |\
+    sed -e "s|ScriptDir|$BINDIR|" |\
+    sed -e "s|^HATINCDIR=|HATINCDIR=$INCDIR|" >$DESTDIR$BINDIR/hat-trans
+    echo "    hat-tools:"
+    sed -e "s|ExecutableDir|$LIBDIR|" script/hat-template.inst |\
+    sed -e "s|ScriptDir|$BINDIR|"  >$DESTDIR$BINDIR/hat-template
+    for hattool in $HATTOOLS
+    do  echo "	"$hattool
+        rm -f $DESTDIR$BINDIR/$hattool;
+        ln $DESTDIR$BINDIR/hat-template $DESTDIR$BINDIR/$hattool
+    done
+    echo
+    chmod +x $DESTDIR$BINDIR/harch
+    chmod +x $DESTDIR$BINDIR/hat-trans
+    chmod +x $DESTDIR$BINDIR/hat-template $DESTDIR$BINDIR/hat-graph
+    rm $DESTDIR$BINDIR/hat-template
+  else
+    echo 'Not (re-)installing scripts'
+  fi
+
+  if [ "$LIB" = "yes" ]
+  then
+    echo "Executables go into:"
+    echo -n "    $DESTDIR$LIBDIR/$MACHINE"
+    if [ ! -d $DESTDIR$LIBDIR/$MACHINE ]
+    then mkdir -p $DESTDIR$LIBDIR/$MACHINE;  echo ' (created)'
+    else echo ' (exists)'
+    fi
+    { ( cd "$BUILDLIBDIR/$MACHINE/"; tar cvf - config hat-* *-hat ) |\
+      ( cd "$DESTDIR$LIBDIR/$MACHINE"; tar xf - ) ; \
+    } 2>&1 | sed -e 's/^/	/'
+    echo
+  else
+    echo 'Not (re-)installing executables and library files'
+  fi
+
+  if [ "$MAN" = "yes" ]
+  then
+    echo "Man pages go into:"
+    echo -n "    $DESTDIR$MANDIR"
+    if [ ! -d $DESTDIR$MANDIR ]
+    then mkdir -p $DESTDIR$MANDIR;  echo ' (created)'
+    else echo ' (exists)'
+    fi
+    for file in man/*.1.in
+    do
+      echo "	`basename $file .in` "
+      sed "s#@BINDIR@#$BINDIR#g" < $file > "$DESTDIR$MANDIR"/`basename "$file" .in`
+    done
+    for file in man/*.1
+    do cp $file $DESTDIR$MANDIR
+    done
+    echo
+  else
+    echo 'Not (re-)installing man pages'
+  fi
+
+  if [ "$DOCS" = "yes" ]
+  then
+    echo "Html documents go into:"
+    echo -n "    $DESTDIR$DOCDIR"
+    if [ ! -d $DESTDIR$DOCDIR ]
+    then mkdir -p $DESTDIR$DOCDIR;  echo ' (created)'
+    else echo ' (exists)'
+    fi
+    ( cd docs; tar cf - . ) | ( cd "$DESTDIR$DOCDIR"; tar xf - )
+  else
+    echo 'Not (re-)installing html documents'
+  fi
+
+fi
+
+echo "Saving current configuration in targets/$MACHINE/config.cache"
+( echo "INSTALLDIR=$INSTALLDIR" ;
+  if [ "$INCDIR" != "$INSTALLDIR/include/hat" ]; then echo "INCDIR=$INCDIR" ; fi;
+  if [ "$LIBDIR" != "$INSTALLDIR/lib/hat" ]; then echo "LIBDIR=$LIBDIR" ; fi;
+  if [ "$MANDIR" != "$INSTALLDIR/man/man1" ]; then echo "MANDIR=$MANDIR" ; fi;
+  if [ "$BINDIR" != "$INSTALLDIR/bin" ]; then echo "BINDIR=$BINDIR" ; fi;
+  echo "DOCDIR=$DOCDIR" ;
+# if [ "$GHCDIR" != "" ]; then echo "GHCDIR=$GHCDIR" ; fi;
+  echo "BUILDWITH=$BUILDWITH" ;
+  echo "BUILDOPTS=\"$BUILDOPTS\"" ;
+  echo "BUILDDIR=$BUILDDIR" ;
+  echo "CC=$CCC" ;
+  echo "LIB=$LIB" ;
+  echo "BIN=$BIN" ;
+  echo "INC=$INC" ;
+  echo "MAN=$MAN" ;
+  echo "DOCS=$DOCS" ;
+  echo "EXE=$EXE" ;
+  echo "INSTALLVER=\"$HATVERSION\"" ;
+  echo "INSTALLINFO=\"$INSTALLINFO\"" ;
+) >targets/$MACHINE/config.cache
+
+echo "Done."
+if [ "$INSTALL" = "yes" ]
+then
+  echo
+  echo "    Please ensure $BINDIR is in your PATH variable."
+fi
+echo
+exit 0

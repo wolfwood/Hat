@@ -1,0 +1,107 @@
+#! /bin/sh
+#
+#       hat-trans script for performing the trace transformation
+#	on a Haskell'98 source file.  The original Module.hs
+#	is supplemented with Module.T.hs.
+#
+# HATBINDIR is where to find driver scripts,
+# HATLIBDIR is where to find executable programs and libraries,
+# HATINCDIR is where to find the hx files for the standard libraries,
+# MACHINE is used to choose which architecture's binaries and
+#               libraries to use.
+
+HATBINDIR=${HATBINDIR-ScriptDir}
+HATLIBDIR=${HATLIBDIR-ExecutableDir}
+MACHINE=${MACHINE-"`$HATBINDIR/harch`"}
+
+# -- HATINCDIR is blank when building the hat library, but must be set to
+# -- the installed location of the .hx files for a full installation.
+HATINCDIR=
+
+if [ ! -d $HATLIBDIR/$MACHINE ]
+then
+  echo "`basename $0` is not installed/configured for $MACHINE."
+  echo "  (Tried directory $HATLIBDIR)"
+  echo "  See your system administrator, or install it yourself from"
+  echo "  http://www.haskell.org/hat/"
+  exit 1
+fi
+
+# -- Source some variables from platform-specific configuration.
+. $HATLIBDIR/$MACHINE/config
+
+# -- temporary space for cpp files
+TMP=${TMP-/tmp}
+CPP=${CPP-"$CC -E -x c -traditional"}
+
+# -- Process command-line arguments, determining
+# --  * source files
+# --  * cpp symbols
+# --  * other arguments to hat-trans
+unlit=""
+cppflags=""
+sources=""
+args=""
+cpp="no"
+for arg in "$@"
+do
+  case $arg in
+    -v|--version)
+           echo "  $0 $INSTALLVER"
+           echo "   $INSTALLINFO"
+           exit 0;;
+    -cpp)  cpp="yes";;
+    *.lhs) sources=$sources" $arg";;
+    *.hs)  sources=$sources" $arg";;
+    -D*)   cppflags=$cppflags" $arg";;
+    -U*)   cppflags=$cppflags" $arg";;
+    *)     args=$args" $arg";;
+  esac
+done
+
+# -- Hack to accommodate versions of hmake <= 3.08
+# --   (They think they generate direct calls to the underlying executable)
+if [ "`echo $sources | wc -w`" -eq "2" ]
+then
+  tmpfile=`echo $sources | cut -d' ' -f1`
+  srcfile=`echo $sources | cut -d' ' -f2`
+  if [ `basename $tmpfile` = `basename $srcfile` ]
+  then
+   case $srcfile in
+     *.lhs) unlit="-unlit";;
+     *)     unlit="";;
+   esac
+   $HATLIBDIR/$MACHINE/`basename $0` -P$HATINCDIR $unlit $args $tmpfile $srcfile
+   exit $?
+  fi
+fi
+  
+
+# -- Translate each input file in turn
+for file in $sources
+do
+  # -- Do preprocessing.
+  if [ "`head -n 1 $file | grep -- -cpp | wc -l`" -eq "1" ]; then cpp="yes"; fi
+  if [ "$cpp" = "yes" ]
+  then
+    tmpfile=$TMP/`basename $file`
+    ${CPP} -D__HAT__ $cppflags $file -o $tmpfile
+  else
+    tmpfile=""
+  fi
+
+  # -- Determine whether input is literate haskell
+  case $file in
+    *.lhs) unlit="-unlit";;
+    *)     unlit="";;
+  esac
+
+  # -- Now call the real program.
+  $HATLIBDIR/$MACHINE/`basename $0` -P$HATINCDIR $unlit $args $tmpfile $file
+  exitcode=$?
+
+  # -- Tidy up
+  if [ -f "$tmpfile" ]; then rm -f $tmpfile; fi
+
+done
+exit $exitcode

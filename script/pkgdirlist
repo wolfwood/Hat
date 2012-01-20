@@ -1,0 +1,80 @@
+#!/bin/sh
+case $1 in
+  arrows)
+	echo Control Control/Arrow Control/Arrow/Transformer Data
+	;;
+  base)	echo Data Debug Control Control/Monad System System/IO System/Console
+	echo Text Text/PrettyPrint Text/Html Text/Show Text/ParserCombinators
+	echo Text/Regex Foreign Foreign/Marshal Foreign/C NHC System/Directory
+	;;
+  Cabal)
+	echo Distribution Distribution/Compat Distribution/PreProcess
+	echo Distribution/Simple Language Language/Haskell
+	;;
+  fgl)	echo Data Data/Graph Data/Graph/Inductive Data/Graph/Inductive/Monad
+	echo Data/Graph/Inductive/Query Data/Graph/Inductive/Internal
+	;;
+  GLUT)	echo Graphics Graphics/UI Graphics/UI/GLUT Graphics/UI/GLUT/Callbacks
+	;;
+  HaXml)
+	echo Text Text/ParserCombinators Text/XML Text/XML/HaXml
+	echo Text/XML/HaXml/Html Text/XML/HaXml/Xtract
+	;;
+  HGL)	echo Graphics Graphics/HGL Graphics/HGL/Draw Graphics/HGL/Internals
+	echo Graphics/HGL/X11 Graphics/HGL/Win32
+	;;
+  HUnit)
+	echo Test Test/HUnit
+	;;
+  haskell-src)
+	echo Language Language/Haskell
+	;;
+  Japi) echo Graphics Graphics/UI Graphics/UI/Japi
+	;;
+  monads)
+	echo Monad
+	echo Unstable Unstable/Control Unstable/Control/Monad
+	echo Unstable/Control/Monad/Private Unstable/Control/Monad/ST
+	;;
+  mtl)	echo Control Control/Monad
+	;;
+  network)
+	echo Network
+	;;
+  ObjectIO)
+	echo Graphics Graphics/UI Graphics/UI/ObjectIO
+	echo Graphics/UI/ObjectIO/Control Graphics/UI/ObjectIO/Device
+	echo Graphics/UI/ObjectIO/Menu Graphics/UI/ObjectIO/OS
+	echo Graphics/UI/ObjectIO/Process Graphics/UI/ObjectIO/Receiver
+	echo Graphics/UI/ObjectIO/Timer Graphics/UI/ObjectIO/Window
+	;;
+  OpenAL)
+	echo Sound Sound/OpenAL Sound/OpenAL/AL Sound/OpenAL/ALC
+	echo Sound/OpenAL/ALUT
+	;;
+  OpenGL)
+	echo Graphics Graphics/Rendering Graphics/Rendering/OpenGL
+	echo Graphics/Rendering/OpenGL/GL
+	echo Graphics/Rendering/OpenGL/GL/PixelRectangles
+	echo Graphics/Rendering/OpenGL/GL/Texturing
+	echo Graphics/Rendering/OpenGL/GLU
+	;;
+  parsec)
+	echo Text Text/ParserCombinators Text/ParserCombinators/Parsec
+	;;
+  QuickCheck)
+	echo Test Test/QuickCheck Debug Debug/QuickCheck
+	;;
+  readline)
+	echo System System/Console
+	;;
+  unix)	echo System System/Posix System/Posix/DynamicLinker System/Posix/Signals
+	;;
+  Win32)
+	echo Graphics Graphics/Win32 Graphics/Win32/GDI System/Win32
+	;;
+  X11)	echo Graphics Graphics/X11 Graphics/X11/Xlib
+	;;
+  *)
+	;;
+esac

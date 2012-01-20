@@ -1,0 +1,115 @@
+name:		hat
+version:	2.05
+license:	OtherLicense
+license-file:	docs/copyright.html
+copyright:	University of York
+author:		hat team <hat@haskell.org>
+homepage:	http://haskell.org/hat/
+category:	Tracing
+synopsis:	Support libraries for the Hat tracing system
+description:
+	The Hat tracing system includes several parts: hat-trans transforms
+	a program to make it generate a trace; the hat support libraries are
+	linked in to enable trace generation; and the hat tools provide
+	several different kinds of browser for the trace data.
+exposed-modules:
+	Hat.Hat
+	Hat.Hack
+	Hat.Array
+	Hat.CPUTime
+	Hat.Char
+	Hat.Complex
+--	Hat.Control.Arrow
+--	Hat.Control.Monad
+--	Hat.Control.Monad.Cont
+--	Hat.Control.Monad.Error
+--	Hat.Control.Monad.Fix
+--	Hat.Control.Monad.Identity
+--	Hat.Control.Monad.List
+--	Hat.Control.Monad.RWS
+--	Hat.Control.Monad.Reader
+--	Hat.Control.Monad.State
+--	Hat.Control.Monad.Trans
+--	Hat.Control.Monad.Writer
+--	Hat.Data.Array
+--	Hat.Data.Bits
+--	Hat.Data.Bool
+--	Hat.Data.Char
+--	Hat.Data.Complex
+--	Hat.Data.Either
+--	Hat.Data.FiniteMap
+--	Hat.Data.IORef
+--	Hat.Data.IORefBuiltin
+--	Hat.Data.Ix
+--	Hat.Data.List
+--	Hat.Data.Maybe
+--	Hat.Data.Monoid
+--	Hat.Data.PackedString
+--	Hat.Data.PackedStringBuiltin
+--	Hat.Data.Ratio
+--	Hat.Data.Set
+--	Hat.Data.Tuple
+--	Hat.Data.Word
+--	Hat.Data.WordBuiltin
+--	Hat.Debug.Trace
+	Hat.Directory
+	Hat.DirectoryBuiltin
+	Hat.DirectoryBuiltinTypes
+--	Hat.Foreign.BuiltinTypes
+--	Hat.Foreign.ForeignPtr
+--	Hat.Foreign.Ptr
+--	Hat.Foreign.StablePtr
+--	Hat.Foreign.Storable
+--	Hat.Foreign.Marshal.Error
+	Hat.IO
+	Hat.IOBuiltin
+	Hat.IOBuiltinTypes
+	Hat.Ix
+	Hat.List
+	Hat.Locale
+	Hat.Maybe
+	Hat.Monad
+	Hat.Numeric
+	Hat.Prelude
+	Hat.PreludeBasic
+	Hat.PreludeBuiltin
+	Hat.PreludeBuiltinTypes
+	Hat.Random
+	Hat.RandomBuiltin
+	Hat.Ratio
+	Hat.System
+	Hat.SystemBuiltin
+	Hat.SystemBuiltinTypes
+--	Hat.System.CPUTime
+--	Hat.System.Cmd
+--	Hat.System.Directory
+--	Hat.System.Environment
+--	Hat.System.Exit
+--	Hat.System.IO
+--	Hat.System.Locale
+--	Hat.System.Random
+--	Hat.System.Time
+--	Hat.System.Console.GetOpt
+--	Hat.System.IO.Error
+--	Hat.System.IO.Unsafe
+--	Hat.Test.QuickCheck
+--	Hat.Text.ParserCombinators.Parsec
+--	Hat.Text.ParserCombinators.Parsec.Char
+--	Hat.Text.ParserCombinators.Parsec.Combinator
+--	Hat.Text.ParserCombinators.Parsec.Error
+--	Hat.Text.ParserCombinators.Parsec.Expr
+--	Hat.Text.ParserCombinators.Parsec.Perm
+--	Hat.Text.ParserCombinators.Parsec.Pos
+--	Hat.Text.ParserCombinators.Parsec.Prim
+--	Hat.Text.PrettyPrint
+--	Hat.Text.PrettyPrint.HughesPJ
+--	Hat.Text.Read
+--	Hat.Text.Show
+	Hat.Time
+	Hat.TimeBuiltin
+	Hat.TimeBuiltinTypes
+hs-source-dir:	src/lib
+--build-depends:	parsec, mtl, base, haskell98
+build-depends:	haskell98
+extensions:	CPP, FFI
+ghc-options:	-fno-warn-overlapping-patterns -fno-warn-missing-methods

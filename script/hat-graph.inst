@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# generate postScript diagram of Hat graph from .hat file
+# output is either multi-page A4 (with -a4 option) or single-page
+FILES=
+PAGE=
+while [ "$1" != "" ]
+do
+  case $1 in
+    -a4) PAGE="-Gpage=8.2,11.7" ;;
+    *) FILES=$FILES" "$1 ;;
+  esac
+  shift
+done
+
+for file in $FILES
+do
+  ScriptDir/hat-check -g $file | dot -Tps \
+   -Gnslimit="3.0" -Gmclimit="3.0" -Grankdir=LR $PAGE -Gratio=auto \
+   -Nfontsize=12 -Efontsize=12 > $file.ps
+done
+

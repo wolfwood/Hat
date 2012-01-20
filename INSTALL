@@ -1,0 +1,24 @@
+The short version is:
+
+  $ ./configure   [ --prefix=/my/installation ]  [ --buildwith=xhc-4.32 ]
+  $ make
+  $ make install
+
+which provides you with all the components of Hat in /usr/local,
+[or in /my/installation if you used the --prefix= option].  If you
+want slightly more control, try
+
+  $ make help
+
+which will give you a list of individual build targets.
+
+**********************************************************************
+**** Full details of the install process are in docs/install.html ****
+**********************************************************************
+
+System requirements:
+
+The build requires GNU make and a C compiler (usually gcc) together
+with the usual tools of the UNIX environment, such as sh, ar, sed, etc.
+You also need a host Haskell compiler, and in particular, write-access
+to its package directories.

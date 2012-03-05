@@ -12,7 +12,7 @@ import List(isPrefixOf,nub,minimumBy,elemIndex)
 
 import Syntax
 import TokenId (TokenId(..),tPrelude,visImport,t_Tuple,getUnqualified,t_Arrow)
-import SysDeps(PackedString, unpackPS, packString)
+import PackedString
 import AssocTree
 import OsOnly
 import Flags

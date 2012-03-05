@@ -5,7 +5,7 @@ import List (isPrefixOf)
 import Syntax
 import AssocTree
 import TokenId (TokenId(Qualified),tPrelude,visImport,t_Tuple)
-import SysDeps (packString)
+import PackedString
 
 -- AuxiliaryInfo is the extra information we need to know about identifiers.
 data AuxiliaryInfo = 

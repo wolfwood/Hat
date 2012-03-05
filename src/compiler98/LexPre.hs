@@ -5,7 +5,8 @@ import Char(isSpace,isDigit,isAlpha)
 import Lex
 import LexLow
 import LexStr	-- includes: tab,lexChr
-import SysDeps(PackedString,packString,isAlphaNum)
+import SysDeps(isAlphaNum)
+import PackedString
 import TokenId(t_List,t_Arrow,t_Tuple)
 import Extra(Pos,toPos)
 

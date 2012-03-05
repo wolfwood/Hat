@@ -8,7 +8,7 @@ import AssocTree
 import NT
 import TokenId(mkQual3,mkQualD,dropM)
 import Extra
-import SysDeps(PackedString,packString)
+import PackedString
 import Info
 import MergeSort(group)
 import Reduce(Reduce)

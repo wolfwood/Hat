@@ -29,7 +29,7 @@ HATTRANS= src/trans/Makefile* \
 DOC = docs/*
 MAN = man/*.1.in man/*.1
 HATTOOLSET= hat-stack hat-check hat-detect hat-delta hat-anim hat-observe \
-		hat-trail hat-view 
+		hat-trail hat-view
 HATTOOLS= $(patsubst %, lib/$(MACHINE)/%, $(HATTOOLSET))
 
 TARGDIR= targets

@@ -8,7 +8,7 @@ import IdKind(IdKind)
 import TokenId(TokenId)
 import NT
 import Extra(Pos,sndOf,strace)
-import SysDeps(PackedString)
+import PackedString
 import AssocTree
 import Syntax(InfixClass(..))
 import Id(Id)

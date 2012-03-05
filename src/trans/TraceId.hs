@@ -52,7 +52,7 @@ import TokenId
 import AuxTypes (AuxiliaryInfo(..),InitAuxInfo(..),Fixity(..),TyCls(..)
                 ,TySynBody,emptyAux,untracedEmptyAux)
 import Maybe (isJust)
-import SysDeps (unpackPS)
+import PackedString (unpackPS)
 
 
 data TraceId = TI TokenId (Maybe AuxiliaryInfo)

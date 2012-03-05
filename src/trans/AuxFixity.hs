@@ -7,7 +7,7 @@ compilation, resolving infix expressions is part of the Rename phase.
 
 module AuxFixity(fixInfixList) where
 
-import SysDeps(PackedString,packString,unpackPS)
+import PackedString
 import Extra(Pos(..),noPos,strPos,pair)
 import Syntax
 import SyntaxPos

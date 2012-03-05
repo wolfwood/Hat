@@ -13,11 +13,7 @@ infixl 5 `ap`
 infixl 5 `chk`
 infixr 4 `orelse`
 
-#if defined(__HASKELL98__)
-#define EVAL(b)
-#else
-#define EVAL(b) (Eval b) =>
-#endif
+-- #define EVAL(b)
 
 --- Define types
 -- parameters:
@@ -51,7 +47,7 @@ parseit' (Right (a,_,_)) = Right a
 parse :: a -> Parser a i b
 parse x = \good bad -> good x
 
-ap :: EVAL(b)  Parser (a->b) i c -> Parser a i c -> Parser b i c
+ap ::  Parser (a->b) i c -> Parser a i c -> Parser b i c
 ap     x y = \good bad ->
                 x       (\u -> y (\v -> let uv = u v in seq uv (good uv) ) bad)
                         bad

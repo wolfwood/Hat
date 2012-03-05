@@ -15,7 +15,7 @@ import TraceId (TraceId,hasValueInfo,arity,isLambdaBound,tokenId)
 import AuxTypes (AuxiliaryInfo) -- hbc's broken import mechanism needs this
 import TokenId (TokenId(..),extractV,t_Arrow,t_List)
 import Id (Id)
-import SysDeps (unpackPS)
+import PackedString (unpackPS)
 
 
 prettyPrintTraceId :: Flags -> (PPInfo TraceId -> a -> Doc) -> a -> String

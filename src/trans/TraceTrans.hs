@@ -24,7 +24,7 @@ import TokenId (TokenId(TupleId,Visible,Qualified)
                ,tPrelude,t_Tuple,t_Arrow,tTrue,tFalse,t_otherwise,t_undef
                ,tMain,tmain,tseq,t_ColonNQ,t_ListNQ,tHatHack)
 import TraceDerive (derive)
-import SysDeps (PackedString,packString,unpackPS)
+import PackedString
 import Extra (Pos,noPos,mergePos,strPos,fromPos,mapListSnd,mapSnd)
 import TraceId (TraceId,tokenId,arity,isLambdaBound,isTraced
                ,fixPriority,mkLambdaBound,mkTyCon,mkField

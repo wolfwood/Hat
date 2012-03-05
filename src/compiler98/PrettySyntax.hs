@@ -20,7 +20,8 @@ import IntState(IntState,strIS,lookupIS)
 import Nice(niceInt,niceNT,mkAL)
 import Info(Info(InfoData),tidI)
 import NT(NewType(NewType))
-import SysDeps (unpackPS,isAlphaNum)
+import SysDeps (isAlphaNum)
+import PackedString
 import Maybe(isJust,fromJust)
 import Flags(Flags,sShowWidth,sShowQualified,sShowIndent)
 

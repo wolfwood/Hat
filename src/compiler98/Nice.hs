@@ -9,7 +9,7 @@ module Nice (fixTid, mkAL, mkALNT
 import NT
 import IntState
 import Extra(dropJust,mixComma,mixSpace,assocDef)
-import SysDeps(PackedString)
+import PackedString
 import TokenId
 import Id(Id)
 

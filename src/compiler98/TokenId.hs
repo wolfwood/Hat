@@ -6,7 +6,8 @@ module TokenId(module TokenId) where
 
 import Char(isUpper)
 import Extra(isNhcOp,Pos,strPos)
-import SysDeps(PackedString, unpackPS, packString)
+--import SysDeps(PackedString, unpackPS, packString)
+import PackedString
 
 
 visible rtoken = Visible (packString rtoken)
@@ -18,7 +19,7 @@ data TokenId =
    | Visible   PackedString	-- unqualified name
    | Qualified PackedString PackedString
      -- token for qualified name: module name, variable name
-   | Qualified2 TokenId TokenId	
+   | Qualified2 TokenId TokenId
      -- token with: class token, type token for a dictionary?
    | Qualified3 TokenId TokenId TokenId
      -- token for method in instance: class token, type token, method token
@@ -30,11 +31,11 @@ instance Show TokenId where
 			    then showString "()"
 	                    else showString "Prelude." . shows s
   showsPrec d (Visible n) = showString (reverse (unpackPS n))
-  showsPrec d (Qualified m n ) = 
-    showString (reverse (unpackPS m)) . showChar '.' . 
+  showsPrec d (Qualified m n ) =
+    showString (reverse (unpackPS m)) . showChar '.' .
     showString (reverse (unpackPS  n))
   showsPrec d (Qualified2 t1 t2) = shows t1 . showChar '.' . shows t2
-  showsPrec d (Qualified3 t1 t2 t3) = 
+  showsPrec d (Qualified3 t1 t2 t3) =
     shows t1 . showChar '.' . shows t2 . showChar '.' . shows t3
 
 mkUnqualifiedTokenId :: String -> TokenId
@@ -48,7 +49,7 @@ getUnqualified = reverse . unpackPS . extractV
 
 isTidOp :: TokenId -> Bool
 isTidOp (TupleId s) = False
-isTidOp tid = 
+isTidOp tid =
   (isNhcOp . head . dropWhile (=='_') . reverse . unpackPS . extractV) tid
 
 isTidCon :: TokenId -> Bool
@@ -64,8 +65,8 @@ isTupleId _                  = False
 
 --notPrelude (Qualified tid n) = tid /= rpsDPrelude && tid /= rpsPrelude
 notPrelude (Qualified tid n) = (tid /= rpsPrelude) -- && (tid /= rpsInternal)
-notPrelude (Qualified2 t1 t2) = notPrelude t1 && notPrelude t2 
-notPrelude (Qualified3 t1 t2 t3) = notPrelude t1 && notPrelude t2 
+notPrelude (Qualified2 t1 t2) = notPrelude t1 && notPrelude t2
+notPrelude (Qualified3 t1 t2 t3) = notPrelude t1 && notPrelude t2
 notPrelude (TupleId _) = False
 
 
@@ -124,22 +125,22 @@ extractV (Qualified3 t1 t2 t3) = extractV t3
 
 {- extend token by adding position to the identifier name -}
 tidPos :: TokenId -> Pos -> TokenId
-tidPos (TupleId s) pos = if s == 0 
+tidPos (TupleId s) pos = if s == 0
 		         then visImport ("():" ++ (strPos pos))
 	                 else visImport (shows s (':' : strPos pos))
-tidPos (Visible n)           pos = 
+tidPos (Visible n)           pos =
   Visible (packString (reverse (strPos pos) ++ ':' : unpackPS n))
-tidPos (Qualified m n )      pos = 
+tidPos (Qualified m n )      pos =
   Qualified m (packString (reverse (strPos pos) ++ ':' : unpackPS n))
 tidPos (Qualified2 t1 t2)    pos =
   Qualified2 t1 (tidPos t2 pos)
-tidPos (Qualified3 t1 t2 t3) pos = 
+tidPos (Qualified3 t1 t2 t3) pos =
   Qualified3 t1 t2 (tidPos t3 pos)
 
 
 {- append given string to module name of qualified token -}
 add2M :: String -> TokenId -> TokenId
-add2M str (Qualified m v) =  
+add2M str (Qualified m v) =
   Qualified (packString (reverse str ++ unpackPS m)) v
 
 visImport = Visible . packString . reverse
@@ -186,7 +187,7 @@ thiding	 	= visImport "hiding"
 tas	 	= visImport "as"
 tinterface 	= visImport "interface"
 tforall	 	= visImport "forall"
-tdot	 	= visImport "."        
+tdot	 	= visImport "."
   -- an unqualified dot, used in types, e.g., "forall a . [a]"
 tunboxed	= visImport "unboxed"
 tprimitive	= visImport "primitive"
@@ -224,8 +225,8 @@ t_ListNQ        = visImport    "[]"
 t_Arrow         = qualImpPrel  "->"
 t_Pair          = qualImpPrel  "(,"
 tString         = qualImpPrel  "String"
-t_filter        = qualImpPrel  "_filter" 
-t_foldr         = qualImpPrel  "_foldr" -- be careful, non-standard signature 
+t_filter        = qualImpPrel  "_filter"
+t_foldr         = qualImpPrel  "_foldr" -- be careful, non-standard signature
 t_Colon         = qualImpPrel  ":"
 t_ColonNQ       = visImport    ":"
 t_x             = visImport    "_x"
@@ -324,7 +325,7 @@ t_eqDouble      = qualImpNHC  "_eqDouble"
 t_eqFloat       = qualImpNHC  "_eqFloat"
 t_otherwise	= tTrue
 
-t_id            = qualImpNHC  "_id"   
+t_id            = qualImpNHC  "_id"
   -- identity function that is not modified by the tracing transformation
 
 

@@ -14,7 +14,7 @@ import ParseLib
 import ParseLex
 import SyntaxPos
 import TokenId(t_Arrow,TokenId(..))
-import SysDeps (packString,unpackPS)
+import PackedString
 
 parseExports =
     Just `parseChk` lpar `apCut` manySep comma parseExport `chk` 

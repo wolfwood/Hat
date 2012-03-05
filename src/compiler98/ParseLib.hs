@@ -40,14 +40,14 @@ infixl 5 `parseChk`
 infixl 5 `revChk`
 infixl 5 `chkCut`
 
-#if defined(__HASKELL98__)
-#define EVAL(b)
-#else
-#define EVAL(b) (Eval b) =>
-#endif
+-- #if defined(__HASKELL98__)
+-- #define EVAL(b)
+-- #else
+-- #define EVAL(b) (Eval b) =>
+-- #endif
 
 
-revAp :: EVAL(b)  Parser a i c -> Parser (a->b) i c -> Parser b i c
+revAp :: Parser a i c -> Parser (a->b) i c -> Parser b i c
 revAp     x y = \good bad ->
                 x       (\u -> y (\v -> let vu = v u in seq vu (good vu)) bad)
                         bad
@@ -98,7 +98,7 @@ cases tps dp = \good bad input@((pos,t,_,_):input') err@(pe,et,msg) ->
                         cases'' pos t good input' dp ep et (show t' : em) tps
 
 
-parseAp :: EVAL(b)  (a->b) -> Parser a i c -> Parser b i c
+parseAp :: (a->b) -> Parser a i c -> Parser b i c
 parseAp     x y = \good ->
                         y (\v -> let xv = x v in seq xv (good xv) )
 
@@ -106,7 +106,7 @@ parseChk :: b -> Parser a i c -> Parser b i c
 parseChk    x y = \good ->
                         y (\_  -> good x)
 
-apCut :: EVAL(b)  Parser (a->b) i c -> Parser a i c -> Parser b i c
+apCut :: Parser (a->b) i c -> Parser a i c -> Parser b i c
 apCut     x y = \good bad->
                 x       (\u input' err' -> y (\v -> let uv = u v in seq uv (good uv)) initBad input' initError)
                         bad
